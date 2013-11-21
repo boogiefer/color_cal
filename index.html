@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>色阶计算器r</title>
+
+<script src='jquery-1.9.1.js'></script>
+<script src='jquery.colors.bundle.js'></script>
+<style type="text/css">
+
+.board{padding: 10px;}
+.board span{display: inline-block; width: 100px; height: 20px; line-height: 20px; text-align: center;
+    transition: transform .5s;
+    -webkit-transition: -webkit-transform .5s;
+}
+.board span:hover{
+    transform: translateY(-3px);
+    -webkit-transform: translateY(-3px);
+    cursor: default;
+}
+textarea{}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="row">
+    <div class="col-md-4">
+        <div class="form">
+            <label>选择颜色1：<input type="color" value="#FFFFFF" id="color_picker_start"></label>
+            <label>选择颜色2：<input type="color" value="#FFFFFF" id="color_picker_end"></label>
+            <label>选择等份 ：<select id="percent">
+                <option>20</option>
+                <option>18</option>
+                <option>16</option>
+                <option>14</option>
+                <option>12</option>
+                <option>10</option>
+                <option>8</option>
+                <option>6</option>
+            </select></label>
+            <button type="button" class="btn btn-lg btn-primary" id="btn">计算！</button>
+        </div>
+    </div>
+    <div class="col-md=8">
+        <div id="board" class="board"></div>
+        <textarea></textarea>
+    </div>
+</div>
+
+</div>
+<script>
+
+$('#btn').click(function(){
+
+    //获取颜色初始化值
+    var color_start = $('#color_picker_start').val();
+    var color_end = $('#color_picker_end').val();
+
+    //获取等份个数
+    var num = $('#percent').val();
+
+    console.log(typeof(num));
+
+    //HEX转换HSL
+    var color_start_hsl = $.colors(color_start).model('HSL').get();
+    var color_end_hsl = $.colors(color_end).model('HSL').get();
+
+    //计算初始化颜色HSL差值
+    var per_0 = -(color_start_hsl[0] - color_end_hsl[0]);
+    var per_1 = -(color_start_hsl[1] - color_end_hsl[1]);
+    var per_2 = -(color_start_hsl[2] - color_end_hsl[2]);
+
+    //等份差额的余
+    var a = per_0/num, b = per_1/num, c = per_2/num, span = '', val = '';
+
+    for(var i = 0; i < num; i++){
+        var color_hex = $.colors([
+                color_start_hsl[0] + a,  color_start_hsl[1] + b,  color_start_hsl[2] + c, 
+            ], 'array3Normalized', 'HSL' ).toString('hex')
+
+        a = a + per_0/num;
+        b = b + per_1/num;
+        c = c + per_2/num;
+        
+        span += '<span style="background-color:' +  color_hex + '">' + color_hex + '</span>';
+        val += color_hex + ',';
+    }
+
+    $('#board').html(span);
+    $('textarea').val(val);
+})
+
+
+</script>
+</body>
+</html>
