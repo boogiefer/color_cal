@@ -67,6 +67,8 @@ $('#btn').click(function(){
     var color_start_hsl = $.colors(color_start).model('HSL').get();
     var color_end_hsl = $.colors(color_end).model('HSL').get();
 
+    console.log(color_start_hsl);
+
     //计算初始化颜色HSL差值
     var per_0 = -(color_start_hsl[0] - color_end_hsl[0]);
     var per_1 = -(color_start_hsl[1] - color_end_hsl[1]);
