@@ -1,99 +1,283 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>色阶计算器 beta</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>色阶计算器r</title>
-
-<script src='jquery-1.9.1.js'></script>
-<script src='jquery.colors.bundle.js'></script>
-<style type="text/css">
-
-.board{padding: 10px;}
-.board span{display: inline-block; width: 100px; height: 20px; line-height: 20px; text-align: center;
-    transition: transform .5s;
-    -webkit-transition: -webkit-transform .5s;
-}
-.board span:hover{
-    transform: translateY(-3px);
-    -webkit-transform: translateY(-3px);
-    cursor: default;
-}
-textarea{}
+<!-- Bootstrap -->
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/spectrum.css" rel="stylesheet">
+<style>
+html, body{height: 100%}
+#wrap {min-height: 100%; height: auto; margin: 0 auto -80px;padding: 0 0 60px;}
+#footer{height: 60px}
+#results{padding: 20px 0}
+#results span{display: inline-block; width: 90px; height: 40px; line-height: 40px; margin: 0 5px 5px 0; text-align: center; color: #000; text-shadow: 0 0 1px #333; cursor: default;}
+#results span:active{position: relative; top: 1px}
+#results.form-horizontal span{display: block; width: 100%}
+.alert-success .glyphicon-remove-circle, .alert-danger .glyphicon-ok-circle{display: none}
+.alert-danger .glyphicon-remove-circle{display: inline-block;}
+.alert p{display: inline-block;}
 </style>
 </head>
 <body>
-<div class="container">
-<div class="row">
-    <div class="col-md-4">
-        <div class="form">
-            <label>选择颜色1：<input type="color" value="#FFFFFF" id="color_picker_start"></label>
-            <label>选择颜色2：<input type="color" value="#FFFFFF" id="color_picker_end"></label>
-            <label>选择等份 ：<select id="percent">
-                <option>20</option>
-                <option>18</option>
-                <option>16</option>
-                <option>14</option>
-                <option>12</option>
-                <option>10</option>
-                <option>8</option>
-                <option>6</option>
-            </select></label>
-            <button type="button" class="btn btn-lg btn-primary" id="btn">计算！</button>
+<div id="wrap">
+    <div class="container">
+        <div class="page-header">
+            <h1>色阶计算器 <small></small></h1>
         </div>
+        <div class="row">
+            <div class="col-xs-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading"><h2>颜色参数</h2></div>
+                    <div class="panel-body">
+                        <form class="form-horizontal">
+                            <div class="form-group form-inline">
+                                <label class="col-sm-4 control-label">深色</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control pickers" id="color_start" value="#ffffff">
+                                    <span class="label label-warning warning-start hide"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group  form-inline">
+                                <label class="col-sm-4 control-label">浅色</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control pickers" id="color_end" value="#ffffff">
+                                    <span class="label label-warning  warning-end hide"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group  form-inline">
+                                <label class="col-sm-4 control-label">等份</label>
+                                <div class="col-sm-8">
+                                    <input type="number" id="color_num" class="form-control input-sm" placeholder="等份" value="10" style="width: 65px">
+                                    <span class="label label-warning  warning-num hide"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="col-sm-8 text-right">
+                                    <button type="button" class="btn btn-primary" id="submit" style="margin-right: 12px">计算</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+            </div>
+            <div class="col-xs-8">
+                <div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><h2>计算结果</h2></div>
+                        <div class="panel-body" id="results-wrap">
+                            <div class="alert alert-success hide" id="tips">
+                                <span class="glyphicon glyphicon-ok-circle"></span>
+                                <span class="glyphicon glyphicon-remove-circle"></span>
+                                <p></p>
+                            </div>
+                            <div class="btn-group"  data-toggle="buttons">
+                                <label class="btn btn-default radio-opts active"><input type="radio" name="options-list" checked="checked"><span class="glyphicon glyphicon-th-large"></span> 横排</label>
+                                <label class="btn btn-default radio-opts"><input type="radio" name="options-list"><span class="glyphicon glyphicon-th-list"></span> 竖排</label>
+                            </div>
+                            <div id="results">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </div>
     </div>
-    <div class="col-md=8">
-        <div id="board" class="board"></div>
-        <textarea></textarea>
+</div>
+<div id="footer">
+<div class="container">
+    <div class="footer">
+        <hr>
+        <p class="text-muted credit">反馈：@colinfan, 团队：ISUX_cloud</p>
     </div>
+</div>
 </div>
 
-</div>
+
+<script src="js/jquery-1.9.1.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/spectrum.js"></script>
+<script src='js/ZeroClipboard.js'></script>
 <script>
+var _start = $('#color_start');
+var _end = $('#color_end');
+var _num = $('#color_num');
+var _btn = $('#submit');
+var _error = [
+    '两个颜色不能一样',
+    '填写大于 0 的数字'
+]
 
-$('#btn').click(function(){
+var _defaults = {
+  moviePath:         "img/ZeroClipboard.swf",        // URL to movie
+  trustedOrigins:    null,                       // Page origins that the SWF should trust (single string or array of strings)
+  hoverClass:        "zeroclipboard-is-hover",   // The class used to hover over the object
+  activeClass:       "zeroclipboard-is-active",  // The class used to set object active
+  allowScriptAccess: "sameDomain",               // SWF outbound scripting policy
+  useNoCache:        true,                       // Include a nocache query parameter on requests for the SWF
+  forceHandCursor:   false,                      // Forcibly set the hand cursor ("pointer") for all glued elements
+  zIndex:            999999999                   // The z-index used by the Flash object. Max value (32-bit): 2147483647
+};
 
-    //获取颜色初始化值
-    var color_start = $('#color_picker_start').val();
-    var color_end = $('#color_picker_end').val();
+//数字验证
+function vali_num(target){
+    var rg = /\d/;
+    if(target <= 0 | !(rg.test(target))){
+        $('.warning-num').removeClass('hide').html(_error[1]);
+        return false;
+    }
+    else{
+        $('.warning-num').addClass('hide');
+        return true;
+    }
+}
 
-    //获取等份个数
-    var num = $('#percent').val();
 
-    console.log(typeof(num));
+//颜色值验证
+function vali_color(target_1, target_2){
+    $('.warning-start', '.warning-start').addClass('hide');
+    if(target_1 == target_2){
+        $('.warning-end').removeClass('hide').html(_error[0]);
+        return false;
+    }
+    else{
+        $('.warning-end').addClass('hide');
+        return true;
+    }
+}
 
-    //HEX转换HSL
-    var color_start_hsl = $.colors(color_start).model('HSL').get();
-    var color_end_hsl = $.colors(color_end).model('HSL').get();
+//数组相加
+function arr_plus(a, b){
+    var _cache = [];
+    for(var i in a) {
+        _cache[i] = a[i] + b[i];
+    };
+    return _cache;
+}
 
-    console.log(color_start_hsl);
 
-    //计算初始化颜色HSL差值
-    var per_0 = -(color_start_hsl[0] - color_end_hsl[0]);
-    var per_1 = -(color_start_hsl[1] - color_end_hsl[1]);
-    var per_2 = -(color_start_hsl[2] - color_end_hsl[2]);
+//等份值事件
+_num.blur(function(){
+    vali_num(this.value);
+});
 
-    //等份差额的余
-    var a = per_0/num, b = per_1/num, c = per_2/num, span = '', val = '';
+//排版按钮事件
+function radio_reg(){
+    $('.radio-opts').click(function(){
+        $('#results').toggleClass('form-horizontal');  
+    })
+}
 
-    for(var i = 0; i < num; i++){
-        var color_hex = $.colors([
-                color_start_hsl[0] + a,  color_start_hsl[1] + b,  color_start_hsl[2] + c, 
-            ], 'array3Normalized', 'HSL' ).toString('hex')
+function cliper(btn){
+    var clip = new ZeroClipboard(btn, _defaults);
+    clip.on( "load", function(client){
+        client.on( "complete", function(client, args) {
+            $('#tips').removeClass('hide alert-danger').children('p').html('已复制' + '<strong>' + args.text + '</strong>');
+        });
+    });
+}
 
-        a = a + per_0/num;
-        b = b + per_1/num;
-        c = c + per_2/num;
-        
-        span += '<span style="background-color:' +  color_hex + '">' + color_hex + '</span>';
-        val += color_hex + ',';
+
+//计算
+_btn.click(function(){
+    //计算前先做验证，否则不做任何操作
+    if(!(vali_color(_start.val(), _end.val()))) return;
+    if(!(vali_num(_num.val()))) return;
+
+    //获取颜色值，返回颜色值数组
+    var _a = tinycolor(_start.val()).toHslString();
+    var _b = tinycolor(_end.val()).toHslString();
+    var _arr = [];
+
+    //计算等份值
+    for(var i in _a){
+        _arr[i] = ( _b[i] - _a[i] ) < 0 ? -( _b[i] - _a[i] ) : ( _b[i] - _a[i] );
+        _arr[i] = _arr[i] / Number(_num.val());
     }
 
-    $('#board').html(span);
-    $('textarea').val(val);
-})
+    //计算N个等份的色值
+    var _cache = [];
+    for(var i = 0; i < _num.val(); i++){
+        _a = arr_plus(_a, _arr) ;
+        _cache.push('hsl(' + _a.toString() + ')');
+    }
 
+    //组装HTML
+    var _htm = document.createElement('div');;
+    for(var i in _cache) {
+        var thiscolor = tinycolor(_cache[i]).toHexString();
+        var colorspan = document.createElement('span');
+        colorspan.style.backgroundColor = thiscolor;
+        colorspan.innerHTML = thiscolor;
+        colorspan.title = '点击复制';
+        $(colorspan).attr('data-clipboard-text', thiscolor);
+        //复制方法
+        cliper(colorspan);
+        $(colorspan).click(function(){
+            $('#tips').addClass('alert-danger').removeClass('hide').children('p').html('动作太快啦，鼠标移开再复制试试。');
+        });
+        _htm.appendChild(colorspan);
+    };
+
+    //输出到页面
+    $('#results').html(_htm);
+
+    radio_reg();
+
+    //显示容器
+    $('#results-wrap').removeClass('hide');
+
+});
+
+
+//初始化颜色选择器
+$('.pickers').spectrum({
+    color: "#fff",
+    showInput: true,
+    showButtons: false,
+    showInitial: true,
+    showPalette: true,
+    showSelectionPalette: true,
+    maxPaletteSize: 10,
+    preferredFormat: "hex",
+    localStorageKey: "colorpicker",
+    move: function (color){
+        
+    },
+    show: function (){
+    
+    },
+    beforeShow: function(color){
+        
+    },
+    hide: function () {
+    
+    },
+    change: function(color){
+        this.value = color.toHexString();
+        vali_color(this.value, _end.value);
+    },
+    palette: [
+        ["rgb(0, 0, 0)", "rgb(67, 67, 67)", "rgb(102, 102, 102)",
+        "rgb(204, 204, 204)", "rgb(217, 217, 217)","rgb(255, 255, 255)"],
+        ["rgb(152, 0, 0)", "rgb(255, 0, 0)", "rgb(255, 153, 0)", "rgb(255, 255, 0)", "rgb(0, 255, 0)",
+        "rgb(0, 255, 255)", "rgb(74, 134, 232)", "rgb(0, 0, 255)", "rgb(153, 0, 255)", "rgb(255, 0, 255)"], 
+        ["rgb(230, 184, 175)", "rgb(244, 204, 204)", "rgb(252, 229, 205)", "rgb(255, 242, 204)", "rgb(217, 234, 211)", 
+        "rgb(208, 224, 227)", "rgb(201, 218, 248)", "rgb(207, 226, 243)", "rgb(217, 210, 233)", "rgb(234, 209, 220)", 
+        "rgb(221, 126, 107)", "rgb(234, 153, 153)", "rgb(249, 203, 156)", "rgb(255, 229, 153)", "rgb(182, 215, 168)", 
+        "rgb(162, 196, 201)", "rgb(164, 194, 244)", "rgb(159, 197, 232)", "rgb(180, 167, 214)", "rgb(213, 166, 189)", 
+        "rgb(204, 65, 37)", "rgb(224, 102, 102)", "rgb(246, 178, 107)", "rgb(255, 217, 102)", "rgb(147, 196, 125)", 
+        "rgb(118, 165, 175)", "rgb(109, 158, 235)", "rgb(111, 168, 220)", "rgb(142, 124, 195)", "rgb(194, 123, 160)",
+        "rgb(166, 28, 0)", "rgb(204, 0, 0)", "rgb(230, 145, 56)", "rgb(241, 194, 50)", "rgb(106, 168, 79)",
+        "rgb(69, 129, 142)", "rgb(60, 120, 216)", "rgb(61, 133, 198)", "rgb(103, 78, 167)", "rgb(166, 77, 121)",
+        "rgb(91, 15, 0)", "rgb(102, 0, 0)", "rgb(120, 63, 4)", "rgb(127, 96, 0)", "rgb(39, 78, 19)", 
+        "rgb(12, 52, 61)", "rgb(28, 69, 135)", "rgb(7, 55, 99)", "rgb(32, 18, 77)", "rgb(76, 17, 48)"]
+    ]
+});
 
 </script>
 </body>
